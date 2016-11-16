@@ -1,3 +1,9 @@
+/*
+Javier Gutierrez 1695491
+Artur Gudima 1695932
+Lionel Noudja Djengoue 1695935
+*/
+
 CREATE TABLE client (id_client INT AUTO_INCREMENT PRIMARY KEY , nom VARCHAR(32) NOT NULL, prenom VARCHAR(32) NOT NULL,
                      telephone INT(10), addresse VARCHAR(64) NOT NULL , courriel varchar(32), nas int(9) UNIQUE NOT NULL,
                      date_naissance date NOT NULL);

@@ -1,3 +1,10 @@
+/*
+ Javier Gutierrez 1695491
+ Artur Gudima 1695932
+ Lionel Noudja Djengoue 1695935
+ */
+
+
 var mysql = require('mysql');
 
 var connection = mysql.createConnection({
@@ -87,7 +94,7 @@ function ajoutCarte(ligneAjouter, i)
         }, function(err, rows, fields){
             if(err) throw err;
             fin++;
-            if (fin > 99) {
+            if (fin > 499) {
                 connection.end();
             }
         });
@@ -97,7 +104,7 @@ function ajoutCarte(ligneAjouter, i)
 connection.connect(function (err)
 {
     if (err) throw err;
-    for(var i = 0; i < 100; i++)
+    for(var i = 0; i < 500; i++)
     {
         ajoutClient(i);
     }
