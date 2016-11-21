@@ -20,7 +20,6 @@ function handleRequest(request, response)
     }
     var profId = url.split("/")[1];
     var tId = url.split("/")[2];
-    console.log(tId);
     //response.end('It Works!! Path Hit: ' + request.url);
     var connection = mysql.createConnection({
         host: 'localhost',
