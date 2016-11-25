@@ -23,16 +23,17 @@ function fail400(response) {
 
 function fail404(response) {
     response.statusCode = 404;
-    response.end("Erreur 404");
+    response.end("Erreur 404: Vérifié votre URL");
 }
 
 function respondWithMessage(response, message) {
 
     response.statusCode = 200;
     response.writeHead(200, {'Content-Type': 'application/json'});
-    response.end(message);
+    response.end(JSON.stringify(message));
 }
 
+//Handler functions for table Carte
 function handleCreateClient(request, response)
 {
 
@@ -40,7 +41,29 @@ function handleCreateClient(request, response)
 
 function handleReadClient(request, response, id)
 {
-
+    if(id != undefined)
+    {
+        connection.query(
+            {
+                sql: "Select * from client where id_client = ?",
+                values: [id]
+            }, function(err, rows){
+                if(err) throw err;
+                respondWithMessage(response, rows);
+                connection.end();
+            });
+    }
+    else
+    {
+        connection.query(
+            {
+                sql: "Select * from client"
+            }, function(err, rows){
+                if(err) throw err;
+                respondWithMessage(response, rows);
+                connection.end();
+            });
+    }
 }
 
 function handleUpdateClient(request, response, id)
@@ -49,6 +72,92 @@ function handleUpdateClient(request, response, id)
 }
 
 function handleDeleteClient(request, response, id)
+{
+
+}
+
+//Handler functions for table Compte
+function handleCreateCompte(request, response)
+{
+
+}
+
+function handleReadCompte(request, response, id)
+{
+    if(id != undefined)
+    {
+        connection.query(
+            {
+                sql: "Select * from compte where id_compte = ?",
+                values: [id]
+            }, function(err, rows){
+                if(err) throw err;
+                respondWithMessage(response, rows);
+                connection.end();
+            });
+    }
+    else
+    {
+        connection.query(
+            {
+                sql: "Select * from compte"
+            }, function(err, rows){
+                if(err) throw err;
+                respondWithMessage(response, rows);
+                connection.end();
+            });
+    }
+}
+
+function handleUpdateCompte(request, response, id)
+{
+
+}
+
+function handleDeleteCompte(request, response, id)
+{
+
+}
+
+//Handler functions for table Carte
+function handleCreateCarte(request, response)
+{
+
+}
+
+function handleReadCarte(request, response, id)
+{
+    if(id != undefined)
+    {
+        connection.query(
+            {
+                sql: "Select * from carte where id_carte = ?",
+                values: [id]
+            }, function(err, rows){
+                if(err) throw err;
+                respondWithMessage(response, rows);
+                connection.end();
+            });
+    }
+    else
+    {
+        connection.query(
+            {
+                sql: "Select * from carte"
+            }, function(err, rows){
+                if(err) throw err;
+                respondWithMessage(response, rows);
+                connection.end();
+            });
+    }
+}
+
+function handleUpdateCarte(request, response, id)
+{
+
+}
+
+function handleDeleteCarte(request, response, id)
 {
 
 }
@@ -64,11 +173,26 @@ function handleRequest(request, response) {
 
     var table = (url.split("/")[1]).toLowerCase();
     var id = (url.split("/")[2]).toLowerCase();
+    connection.connect(function (err) {
+        if (err) throw err;
+        if(table == "client")
+        {
+            handleReadClient(request, response, id)
+        }
+        else if(table == "compte")
+        {
+            handleReadCompte(request, response, id)
+        }
+        else if(table == "carte")
+        {
+            handleReadCarte(request, response, id)
+        }
+        else
+        {
+            response.end("L'addresse n'est pas conforme.");
+        }
+    });
 
-
-
-
-    response.end("L'addresse n'est pas conforme.");
 }
 
 var server = http.createServer(handleRequest);
