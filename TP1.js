@@ -79,7 +79,29 @@ function handleUpdateClient(request, response, id)
 
 function handleDeleteClient(request, response, id)
 {
-
+    if(id != undefined)
+    {
+        connection.query(
+            {
+                sql: "delete from client where id_client = ?",
+                values: [id]
+            }, function(err, rows) {
+                if (err) throw err;
+                console.log(JSON.stringify(rows));
+                if (JSON.stringify(rows) == "[]")
+                {
+                    fail400(response);
+                }
+                else
+                {
+                    respondWithMessage(response, "Le client " + id + " a été supprimé.");
+                }
+            });
+    }
+    else
+    {
+        fail404(response);
+    }
 }
 
 //Handler functions for table Compte
@@ -98,7 +120,7 @@ function handleReadCompte(request, response, id)
                 values: [id]
             }, function(err, rows){
                 if(err) throw err;
-                if (rows == [])
+                if (JSON.stringify(rows) == "[]")
                 {
                     fail400(response);
                 }
@@ -127,7 +149,29 @@ function handleUpdateCompte(request, response, id)
 
 function handleDeleteCompte(request, response, id)
 {
-
+    if(id != undefined)
+    {
+        connection.query(
+            {
+                sql: "delete from compte where id_compte = ?",
+                values: [id]
+            }, function(err, rows) {
+                if (err) throw err;
+                console.log(JSON.stringify(rows));
+                if (JSON.stringify(rows) == "[]")
+                {
+                    fail400(response);
+                }
+                else
+                {
+                    respondWithMessage(response, "Le compte " + id + " a été supprimé.");
+                }
+            });
+    }
+    else
+    {
+        fail404(response);
+    }
 }
 
 //Handler functions for table Carte
@@ -146,7 +190,7 @@ function handleReadCarte(request, response, id)
                 values: [id]
             }, function(err, rows){
                 if(err) throw err;
-                if (rows == [])
+                if (JSON.stringify(rows) == "[]")
                 {
                     fail400(response);
                 }
@@ -184,7 +228,6 @@ function handleDeleteCarte(request, response, id)
                 values: [id]
             }, function(err, rows) {
                 if (err) throw err;
-                console.log(JSON.stringify(rows));
                 if (JSON.stringify(rows) == "[]")
                 {
                     fail400(response);
@@ -214,22 +257,87 @@ function handleRequest(request, response) {
     var id = url.split("/")[2];
     connection.getConnection(function (err) {
         if (err) throw err;
-        if(table == "client")
-        {
-            handleReadClient(request, response, id)
+        if ( request.method == "PUT" ) {
+            if(table == "client")
+            {
+                handleUpdateClient(request, response, id);
+            }
+            else if(table == "compte")
+            {
+                handleUpdateCompte(request, response, id);
+            }
+            else if(table == "carte")
+            {
+                handleUpdateCarte(request, response, id);
+            }
+            else
+            {
+                response.end("L'addresse n'est pas conforme.");
+            }
+            return;
         }
-        else if(table == "compte")
-        {
-            handleReadCompte(request, response, id)
+
+        if ( request.method == "GET" ) {
+            if(table == "client")
+            {
+                handleReadClient(request, response, id);
+            }
+            else if(table == "compte")
+            {
+                handleReadCompte(request, response, id);
+            }
+            else if(table == "carte")
+            {
+                handleReadCarte(request, response, id);
+            }
+            else
+            {
+                response.end("L'addresse n'est pas conforme.");
+            }
+            return;
         }
-        else if(table == "carte")
-        {
-            handleReadCarte(request, response, id)
+
+        if ( request.method == "POST" ) {
+
+            if(table == "client")
+            {
+                handleCreateClient(request, response, id);
+            }
+            else if(table == "compte")
+            {
+                handleCreateCompte(request, response, id);
+            }
+            else if(table == "carte")
+            {
+                handleCreateCarte(request, response, id);
+            }
+            else
+            {
+                response.end("L'addresse n'est pas conforme.");
+            }
+            return;
         }
-        else
-        {
-            response.end("L'addresse n'est pas conforme.");
+
+        if ( request.method == "DELETE" ) {
+            if(table == "client")
+            {
+                handleDeleteClient(request, response, id);
+            }
+            else if(table == "compte")
+            {
+                handleDeleteCompte(request, response, id);
+            }
+            else if(table == "carte")
+            {
+                handleDeleteCarte(request, response, id);
+            }
+            else
+            {
+                response.end("L'addresse n'est pas conforme.");
+            }
+            return;
         }
+
     });
 
 }
