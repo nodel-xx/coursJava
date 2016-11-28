@@ -9,7 +9,8 @@ var http = require('http');
 const PORT = 8080;
 
 var mysql = require('mysql');
-var connection = mysql.createConnection({
+var connection = mysql.createPool({
+    connectionLimit : 10,
     host: 'localhost',
     user: 'nodel',
     password: '',
@@ -18,7 +19,7 @@ var connection = mysql.createConnection({
 
 function fail400(response) {
     response.statusCode = 400;
-    response.end();
+    response.end("Erreur 400: Élément introuvable");
 }
 
 function fail404(response) {
@@ -47,10 +48,16 @@ function handleReadClient(request, response, id)
             {
                 sql: "Select * from client where id_client = ?",
                 values: [id]
-            }, function(err, rows){
-                if(err) throw err;
-                respondWithMessage(response, rows);
-                connection.end();
+            }, function(err, rows) {
+                if (err) throw err;
+                if (JSON.stringify(rows) == "[]")
+                {
+                    fail400(response);
+                }
+                else
+                {
+                    respondWithMessage(response, rows);
+                }
             });
     }
     else
@@ -61,7 +68,6 @@ function handleReadClient(request, response, id)
             }, function(err, rows){
                 if(err) throw err;
                 respondWithMessage(response, rows);
-                connection.end();
             });
     }
 }
@@ -92,8 +98,14 @@ function handleReadCompte(request, response, id)
                 values: [id]
             }, function(err, rows){
                 if(err) throw err;
-                respondWithMessage(response, rows);
-                connection.end();
+                if (rows == [])
+                {
+                    fail400(response);
+                }
+                else
+                {
+                    respondWithMessage(response, rows);
+                }
             });
     }
     else
@@ -104,7 +116,6 @@ function handleReadCompte(request, response, id)
             }, function(err, rows){
                 if(err) throw err;
                 respondWithMessage(response, rows);
-                connection.end();
             });
     }
 }
@@ -135,8 +146,15 @@ function handleReadCarte(request, response, id)
                 values: [id]
             }, function(err, rows){
                 if(err) throw err;
-                respondWithMessage(response, rows);
-                connection.end();
+                if (rows == [])
+                {
+                    fail400(response);
+                }
+                else
+                {
+                    respondWithMessage(response, rows);
+                }
+
             });
     }
     else
@@ -147,7 +165,6 @@ function handleReadCarte(request, response, id)
             }, function(err, rows){
                 if(err) throw err;
                 respondWithMessage(response, rows);
-                connection.end();
             });
     }
 }
@@ -159,7 +176,29 @@ function handleUpdateCarte(request, response, id)
 
 function handleDeleteCarte(request, response, id)
 {
-
+    if(id != undefined)
+    {
+        connection.query(
+            {
+                sql: "delete from carte where id_carte = ?",
+                values: [id]
+            }, function(err, rows) {
+                if (err) throw err;
+                console.log(JSON.stringify(rows));
+                if (JSON.stringify(rows) == "[]")
+                {
+                    fail400(response);
+                }
+                else
+                {
+                    respondWithMessage(response, "La carte " + id + " a été supprimé.");
+                }
+            });
+    }
+    else
+    {
+        fail404(response);
+    }
 }
 
 
@@ -171,9 +210,9 @@ function handleRequest(request, response) {
         return;
     }
 
-    var table = (url.split("/")[1]).toLowerCase();
-    var id = (url.split("/")[2]).toLowerCase();
-    connection.connect(function (err) {
+    var table = url.split("/")[1];
+    var id = url.split("/")[2];
+    connection.getConnection(function (err) {
         if (err) throw err;
         if(table == "client")
         {
