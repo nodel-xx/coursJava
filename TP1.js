@@ -27,6 +27,11 @@ function fail404(response) {
     response.end("Erreur 404: Vérifié votre URL");
 }
 
+function fail500(response, message) {
+    response.statusCode = 500;
+    response.end(JSON.stringify(message));
+}
+
 function respondWithMessage(response, message) {
 
     response.statusCode = 200;
@@ -34,10 +39,47 @@ function respondWithMessage(response, message) {
     response.end(JSON.stringify(message));
 }
 
+function respondWithMessageAndChild(response, message, parenturl, childId) {
+
+    response.writeHead(201, {
+        'Content-Type': 'application/json',
+        'Location': parenturl + "/" + childId
+    });
+
+    response.end(message);
+}
+
+function checkAndReturn(response, err) {
+
+    if ( err ) {
+        fail500(response, err);
+        console.log(err);
+        return true;
+    } else {
+        return false;
+    }
+}
+
 //Handler functions for table Carte
 function handleCreateClient(request, response)
 {
+    var body = [];
+    request.on('data', function(chunk) {
+        body.push(chunk);
+    }).on("error", function() {
+        fail500(response);
+    }).on('end', function() {
+        var stringBody = Buffer.concat(body).toString();
+        var input = JSON.parse(stringBody);
 
+        connection.query("insert into client set ?", input, function(err, rows) {
+
+            if ( checkAndReturn(response, err) ) return;
+
+            input.id_client = rows.insertId;
+            respondWithMessageAndChild(response, JSON.stringify(input), request.url, rows.insertId);
+        });
+    });
 }
 
 function handleReadClient(request, response, id)
@@ -48,8 +90,8 @@ function handleReadClient(request, response, id)
             {
                 sql: "Select * from client where id_client = ?",
                 values: [id]
-            }, function(err, rows) {
-                if (err) throw err;
+            }, function(err, rows){
+                if ( checkAndReturn(response, err) ) return;
                 if (JSON.stringify(rows) == "[]")
                 {
                     fail400(response);
@@ -58,6 +100,7 @@ function handleReadClient(request, response, id)
                 {
                     respondWithMessage(response, rows);
                 }
+
             });
     }
     else
@@ -66,7 +109,7 @@ function handleReadClient(request, response, id)
             {
                 sql: "Select * from client"
             }, function(err, rows){
-                if(err) throw err;
+                if ( checkAndReturn(response, err) ) return;
                 respondWithMessage(response, rows);
             });
     }
@@ -74,7 +117,29 @@ function handleReadClient(request, response, id)
 
 function handleUpdateClient(request, response, id)
 {
+    if(id == undefined)
+    {
+        fail404(response);
+        return;
+    }
 
+    var body = [];
+    request.on('data', function(chunk) {
+        body.push(chunk);
+    }).on("error", function() {
+        fail500(response);
+    }).on('end', function() {
+        var stringBody = Buffer.concat(body).toString();
+        var input = JSON.parse(stringBody);
+        delete input.id_client;
+
+        connection.query("update client set ? where id_client = ?", [input, id], function(err) {
+
+            if ( checkAndReturn(response, err) ) return;
+
+            respondWithMessage(response, "Modification faite avec succès");
+        });
+    });
 }
 
 function handleDeleteClient(request, response, id)
@@ -86,15 +151,14 @@ function handleDeleteClient(request, response, id)
                 sql: "delete from client where id_client = ?",
                 values: [id]
             }, function(err, rows) {
-                if (err) throw err;
-                console.log(JSON.stringify(rows));
+                if ( checkAndReturn(response, err) ) return;
                 if (JSON.stringify(rows) == "[]")
                 {
                     fail400(response);
                 }
                 else
                 {
-                    respondWithMessage(response, "Le client " + id + " a été supprimé.");
+                    respondWithMessage(response, "La client " + id + " a été supprimé.");
                 }
             });
     }
@@ -107,7 +171,23 @@ function handleDeleteClient(request, response, id)
 //Handler functions for table Compte
 function handleCreateCompte(request, response)
 {
+    var body = [];
+    request.on('data', function(chunk) {
+        body.push(chunk);
+    }).on("error", function() {
+        fail500(response);
+    }).on('end', function() {
+        var stringBody = Buffer.concat(body).toString();
+        var input = JSON.parse(stringBody);
 
+        connection.query("insert into compte set ?", input, function(err, rows) {
+
+            if ( checkAndReturn(response, err) ) return;
+
+            input.id_compte = rows.insertId;
+            respondWithMessageAndChild(response, JSON.stringify(input), request.url, rows.insertId);
+        });
+    });
 }
 
 function handleReadCompte(request, response, id)
@@ -119,7 +199,7 @@ function handleReadCompte(request, response, id)
                 sql: "Select * from compte where id_compte = ?",
                 values: [id]
             }, function(err, rows){
-                if(err) throw err;
+                if ( checkAndReturn(response, err) ) return;
                 if (JSON.stringify(rows) == "[]")
                 {
                     fail400(response);
@@ -128,6 +208,7 @@ function handleReadCompte(request, response, id)
                 {
                     respondWithMessage(response, rows);
                 }
+
             });
     }
     else
@@ -136,7 +217,7 @@ function handleReadCompte(request, response, id)
             {
                 sql: "Select * from compte"
             }, function(err, rows){
-                if(err) throw err;
+                if ( checkAndReturn(response, err) ) return;
                 respondWithMessage(response, rows);
             });
     }
@@ -144,7 +225,29 @@ function handleReadCompte(request, response, id)
 
 function handleUpdateCompte(request, response, id)
 {
+    if(id == undefined)
+    {
+        fail404(response);
+        return;
+    }
 
+    var body = [];
+    request.on('data', function(chunk) {
+        body.push(chunk);
+    }).on("error", function() {
+        fail500(response);
+    }).on('end', function() {
+        var stringBody = Buffer.concat(body).toString();
+        var input = JSON.parse(stringBody);
+        delete input.id_compte;
+
+        connection.query("update compte set ? where id_compte = ?", [input, id], function(err) {
+
+            if ( checkAndReturn(response, err) ) return;
+
+            respondWithMessage(response, "Modification faite avec succès");
+        });
+    });
 }
 
 function handleDeleteCompte(request, response, id)
@@ -156,15 +259,14 @@ function handleDeleteCompte(request, response, id)
                 sql: "delete from compte where id_compte = ?",
                 values: [id]
             }, function(err, rows) {
-                if (err) throw err;
-                console.log(JSON.stringify(rows));
+                if ( checkAndReturn(response, err) ) return;
                 if (JSON.stringify(rows) == "[]")
                 {
                     fail400(response);
                 }
                 else
                 {
-                    respondWithMessage(response, "Le compte " + id + " a été supprimé.");
+                    respondWithMessage(response, "La compte " + id + " a été supprimé.");
                 }
             });
     }
@@ -177,7 +279,23 @@ function handleDeleteCompte(request, response, id)
 //Handler functions for table Carte
 function handleCreateCarte(request, response)
 {
+    var body = [];
+    request.on('data', function(chunk) {
+        body.push(chunk);
+    }).on("error", function() {
+        fail500(response);
+    }).on('end', function() {
+        var stringBody = Buffer.concat(body).toString();
+        var input = JSON.parse(stringBody);
 
+        connection.query("insert into carte set ?", input, function(err, rows) {
+
+            if ( checkAndReturn(response, err) ) return;
+
+            input.id_carte = rows.insertId;
+            respondWithMessageAndChild(response, JSON.stringify(input), request.url, rows.insertId);
+        });
+    });
 }
 
 function handleReadCarte(request, response, id)
@@ -189,7 +307,7 @@ function handleReadCarte(request, response, id)
                 sql: "Select * from carte where id_carte = ?",
                 values: [id]
             }, function(err, rows){
-                if(err) throw err;
+                if ( checkAndReturn(response, err) ) return;
                 if (JSON.stringify(rows) == "[]")
                 {
                     fail400(response);
@@ -207,7 +325,7 @@ function handleReadCarte(request, response, id)
             {
                 sql: "Select * from carte"
             }, function(err, rows){
-                if(err) throw err;
+                if ( checkAndReturn(response, err) ) return;
                 respondWithMessage(response, rows);
             });
     }
@@ -215,7 +333,29 @@ function handleReadCarte(request, response, id)
 
 function handleUpdateCarte(request, response, id)
 {
+    if(id == undefined)
+    {
+        fail404(response);
+        return;
+    }
 
+    var body = [];
+    request.on('data', function(chunk) {
+        body.push(chunk);
+    }).on("error", function() {
+        fail500(response);
+    }).on('end', function() {
+        var stringBody = Buffer.concat(body).toString();
+        var input = JSON.parse(stringBody);
+        delete input.id_carte;
+
+        connection.query("update carte set ? where id_carte = ?", [input, id], function(err) {
+
+            if ( checkAndReturn(response, err) ) return;
+
+            respondWithMessage(response, "Modification faite avec succès");
+        });
+    });
 }
 
 function handleDeleteCarte(request, response, id)
@@ -227,7 +367,7 @@ function handleDeleteCarte(request, response, id)
                 sql: "delete from carte where id_carte = ?",
                 values: [id]
             }, function(err, rows) {
-                if (err) throw err;
+                if ( checkAndReturn(response, err) ) return;
                 if (JSON.stringify(rows) == "[]")
                 {
                     fail400(response);
@@ -301,15 +441,15 @@ function handleRequest(request, response) {
 
             if(table == "client")
             {
-                handleCreateClient(request, response, id);
+                handleCreateClient(request, response);
             }
             else if(table == "compte")
             {
-                handleCreateCompte(request, response, id);
+                handleCreateCompte(request, response);
             }
             else if(table == "carte")
             {
-                handleCreateCarte(request, response, id);
+                handleCreateCarte(request, response);
             }
             else
             {
@@ -335,7 +475,6 @@ function handleRequest(request, response) {
             {
                 response.end("L'addresse n'est pas conforme.");
             }
-            return;
         }
 
     });
