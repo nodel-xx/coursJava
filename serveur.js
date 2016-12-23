@@ -347,7 +347,6 @@ function handleUpdateCarte(request, response, id)
     }).on('end', function() {
         var stringBody = Buffer.concat(body).toString();
         var input = JSON.parse(stringBody);
-
         delete input.id_carte;
 
         connection.query("update carte set ? where id_carte = ?", [input, id], function(err) {

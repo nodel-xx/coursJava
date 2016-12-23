@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulaire</title>
+    <script language="JavaScript">
+        function clique()
+        {
+            var p = document.getElementById("id_prenom");
+            var n = document.getElementById("id_nom");
+            var a = document.getElementById("id_age");
+            var s = document.getElementById("id_sexe");
+            var err = false;
+
+            if(p.value == "")
+            {
+                console.log("Le prenom ne peut être vide");
+                err = true;
+            }
+            if(n.value == "")
+            {
+                console.log("Le nom ne peut être vide");
+                err = true;
+            }
+            if(a.value == "")
+            {
+                console.log("L'age ne peut être vide");
+                err = true;
+            }
+            else if(!a.value.match(/^[0-9]+$/))
+            {
+                console.log("L'age ne doit contenir que des chiffres");
+                err = true;
+            }
+            if(s.value == "X")
+            {
+                console.log("Veuillez choisir votre sexe");
+                err = true;
+            }
+            if(err) return;
+
+            console.log("Prenom: " + p.value);
+            console.log("Nom: " + n.value);
+            console.log("Age: " + a.value);
+            console.log("Sexe: " + s.value);
+            p.value = "";
+            n.value = "";
+            a.value = "";
+            s.value = "X";
+        }
+        function choisir()
+        {
+            <!--document.querySelector("option[value='on']").selected = true;-->
+            var choix = document.querySelector("#id_province");
+            choix.value = "on";
+        }
+        function load()
+        {
+            var info_a_ajouter = {
+                nom: "un nom",
+                prenom: "un prenom",
+                age: 17,
+                enfants: ["Pierre", "Jean", "Jacques", "Paul"]
+            };
+
+            document.querySelector("#id_prenom").value = info_a_ajouter.prenom;
+            document.querySelector("#id_nom").value = info_a_ajouter.nom;
+            document.querySelector("#id_age").value = info_a_ajouter.age;
+            var next = document.querySelector("#id_loader");
+            var parent = document.querySelector("form");
+            if(info_a_ajouter.enfants.length)
+            {
+                var label = document.createElement("div");
+                label.innerHTML = "Enfants:<br>";
+                parent.insertBefore(label, next);
+            }
+            for(var i = 1; i <= info_a_ajouter.enfants.length; i++)
+            {
+                var eft = document.createElement("input");
+                eft.id = "id_enfant_" + i;
+                eft.type = "text";
+                eft.name = "enfant_" + i;
+                eft.value = info_a_ajouter.enfants[i-1];
+                parent.insertBefore(eft, next);
+                var br = document.createElement("br");
+                parent.insertBefore(br, next);
+                var br1 = document.createElement("br");
+                parent.insertBefore(br1, next);
+            }
+        }
+        function save()
+        {
+
+        }
+    </script>
+</head>
+<body>
+    <form>
+        Prenom:<br>
+        <input id="id_prenom" type="text" name="prenom" value=""><br><br>
+        Nom:<br>
+        <input id="id_nom" type="text" name="nom" value=""><br><br>
+        Age:<br>
+        <input id="id_age" type="text" name="age" value=""><br><br>
+
+        <input id="id_loader" type="button" name="populer" value="Populer" onclick="load()"><br><br>
+        <input id="id_sauver" type="button" name="sauver" value="Sauvegarder" onclick="save()">
+        <!-- Sexe:
+        <select id="id_sexe">
+            <option value="X">Choisir votre sexe</option>
+            <option value="Masculin">Masculin</option>
+            <option value="Féminin">Féminin</option>
+        </select><br><br>
+        <input id="id_sauver" type="button" name="sauver" value="Sauvegarder" onclick="clique()"><br><br>
+        Province:
+        <select id="id_province">
+            <option value="na">Choisir votre province</option>
+            <option value="qc">Québec</option>
+            <option value="on">Ontario</option>
+            <option value="ab">Alberta</option>
+        </select><br><br>
+        <input id="id_choisir" type="button" name="choix" value="Choisir" onclick="choisir()"><br>
+        -->
+    </form>
+
+</body>
+</html>
